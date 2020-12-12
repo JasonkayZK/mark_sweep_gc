@@ -1,7 +1,7 @@
 #include "obj.h"
 #include <iostream>
 
-void objectPrint(Object *object) {
+void Object::objectPrint(Object *object) {
     switch (object->type) {
         case ObjectType::OBJ_INT:
             printf("%d", object->value);
@@ -9,9 +9,9 @@ void objectPrint(Object *object) {
 
         case ObjectType::OBJ_PAIR:
             printf("(");
-            objectPrint(object->head);
+            Object::objectPrint(object->head);
             printf(", ");
-            objectPrint(object->tail);
+            Object::objectPrint(object->tail);
             printf(")");
             break;
     }

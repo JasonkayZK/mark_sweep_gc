@@ -4,77 +4,82 @@
 
 void test1() {
     printf("Test 1: Objects on stack are preserved.\n");
-    VM* vm = newVM();
-    pushInt(vm, 1);
-    pushInt(vm, 2);
+    auto vm = new VM();
+    vm->pushInt(1);
+    vm->pushInt(2);
 
-    gc(vm);
-    assert(vm->numObjects == 2, "Should have preserved objects.");
-    freeVM(vm);
+    vm->gc();
+    VM::assert(vm->numObjects == 2, "Should have preserved objects.");
+    vm->freeVM();
+    delete (vm);
 }
 
 void test2() {
     printf("Test 2: Unreached objects are collected.\n");
-    VM* vm = newVM();
-    pushInt(vm, 1);
-    pushInt(vm, 2);
-    pop(vm);
-    pop(vm);
+    auto vm = new VM();
+    vm->pushInt(1);
+    vm->pushInt(2);
+    vm->pop();
+    vm->pop();
 
-    gc(vm);
-    assert(vm->numObjects == 0, "Should have collected objects.");
-    freeVM(vm);
+    vm->gc();
+    VM::assert(vm->numObjects == 0, "Should have collected objects.");
+    vm->freeVM();
+    delete (vm);
 }
 
 void test3() {
     printf("Test 3: Reach nested objects.\n");
-    VM* vm = newVM();
-    pushInt(vm, 1);
-    pushInt(vm, 2);
-    pushPair(vm);
-    pushInt(vm, 3);
-    pushInt(vm, 4);
-    pushPair(vm);
-    pushPair(vm);
+    auto vm = new VM();
+    vm->pushInt(1);
+    vm->pushInt(2);
+    vm->pushPair();
+    vm->pushInt(3);
+    vm->pushInt(4);
+    vm->pushPair();
+    vm->pushPair();
 
-    gc(vm);
-    assert(vm->numObjects == 7, "Should have reached objects.");
-    freeVM(vm);
+    vm->gc();
+    VM::assert(vm->numObjects == 7, "Should have reached objects.");
+    vm->freeVM();
+    delete (vm);
 }
 
 void test4() {
     printf("Test 4: Handle cycles.\n");
-    VM* vm = newVM();
-    pushInt(vm, 1);
-    pushInt(vm, 2);
-    Object* a = pushPair(vm);
-    pushInt(vm, 3);
-    pushInt(vm, 4);
-    Object* b = pushPair(vm);
+    auto vm = new VM();
+    vm->pushInt(1);
+    vm->pushInt(2);
+    Object *a = vm->pushPair();
+    vm->pushInt(3);
+    vm->pushInt(4);
+    Object *b = vm->pushPair();
 
     /* Set up a cycle, and also make 2 and 4 unreachable and collectible. */
     a->tail = b;
     b->tail = a;
 
-    gc(vm);
-    assert(vm->numObjects == 4, "Should have collected objects.");
-    freeVM(vm);
+    vm->gc();
+    VM::assert(vm->numObjects == 4, "Should have collected objects.");
+    vm->freeVM();
+    delete (vm);
 }
 
 void perfTest() {
     printf("Performance Test.\n");
-    VM* vm = newVM();
+    auto vm = new VM();
 
     for (int i = 0; i < 1000; i++) {
         for (int j = 0; j < 20; j++) {
-            pushInt(vm, i);
+            vm->pushInt(i);
         }
 
         for (int k = 0; k < 20; k++) {
-            pop(vm);
+            vm->pop();
         }
     }
-    freeVM(vm);
+    vm->freeVM();
+    delete (vm);
 }
 
 int main() {

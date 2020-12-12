@@ -3,11 +3,12 @@
 
 #include "../vm/vm.h"
 
-struct VM;
+class VM;
 
 enum class ObjectType;
 
-struct Object {
+class Object {
+public:
     ObjectType type;
     unsigned char marked;
 
@@ -24,8 +25,8 @@ struct Object {
             Object *tail;
         };
     };
-};
 
-void objectPrint(Object *object);
+    void static objectPrint(Object *object);
+};
 
 #endif //MARK_SWEEP_GC_OBJ_H

@@ -1,38 +1,31 @@
 #include "vm.h"
 #include <iostream>
-#include <cstdlib>
 
-void assert(int condition, const char *message) {
-    if (!condition) {
-        printf("%s\n", message);
-        exit(1);
-    }
+VM::VM() {
+    std::cout << "vm started!" << std::endl;
+    this->stackSize = 0;
+    this->firstObject = nullptr;
+    this->numObjects = 0;
+    this->maxObjects = INIT_OBJ_NUM_MAX;
 }
 
-VM *newVM() {
-//    VM *vm = static_cast<VM *>(malloc(sizeof(VM)));
-    VM* vm = new VM();
-    vm->stackSize = 0;
-    vm->firstObject = nullptr;
-    vm->numObjects = 0;
-    vm->maxObjects = INIT_OBJ_NUM_MAX;
-    return vm;
+VM::~VM() {
+    std::cout << "full-gc finished, vm closed!" << std::endl;
 }
 
-
-void push(VM *vm, Object *value) {
-    assert(vm->stackSize < STACK_MAX, "Stack overflow!");
-    vm->stack[vm->stackSize++] = value;
+void VM::push(Object *value) {
+    assert(this->stackSize < STACK_MAX, "Stack overflow!");
+    this->stack[this->stackSize++] = value;
 }
 
 
-Object *pop(VM *vm) {
-    assert(vm->stackSize > 0, "Stack underflow!");
-    return vm->stack[--vm->stackSize];
+Object *VM::pop() {
+    assert(this->stackSize > 0, "Stack underflow!");
+    return this->stack[--this->stackSize];
 }
 
-void mark(Object *object) {
-    /* If already marked, we're done. Check this first to avoid recursing
+void VM::mark(Object *object) {
+    /* If already marked, we're done. Check this first to avoid recursively
        on cycles in the object graph. */
     if (object->marked) return;
 
@@ -44,23 +37,23 @@ void mark(Object *object) {
     }
 }
 
-void markAll(VM *vm) {
-    for (int i = 0; i < vm->stackSize; i++) {
-        mark(vm->stack[i]);
+void VM::markAll() {
+    for (int i = 0; i < this->stackSize; i++) {
+        mark(this->stack[i]);
     }
 }
 
-void sweep(VM *vm) {
-    Object **object = &vm->firstObject;
+void VM::sweep() {
+    Object **object = &this->firstObject;
     while (*object) {
         if (!(*object)->marked) {
             /* This object wasn't reached, so remove it from the list and free it. */
             Object *unreached = *object;
 
             *object = unreached->next;
-            delete(unreached);
+            delete (unreached);
 
-            vm->numObjects--;
+            this->numObjects--;
         } else {
             /* This object was reached, so unmark it (for the next GC) and move on to
              the next. */
@@ -70,51 +63,57 @@ void sweep(VM *vm) {
     }
 }
 
-void gc(VM *vm) {
-    int numObjects = vm->numObjects;
+void VM::gc() {
+    int i_numObjects = this->numObjects;
 
-    markAll(vm);
-    sweep(vm);
+    markAll();
+    sweep();
 
-    vm->maxObjects = vm->numObjects == 0 ? INIT_OBJ_NUM_MAX : vm->numObjects * 2;
+    this->maxObjects = this->numObjects == 0 ? INIT_OBJ_NUM_MAX : this->numObjects * 2;
 
-    printf("Collected %d objects, %d remaining.\n", numObjects - vm->numObjects,
-           vm->numObjects);
+    printf("Collected %d objects, %d remaining.\n", i_numObjects - this->numObjects,
+           this->numObjects);
 }
 
-Object *newObject(VM *vm, ObjectType type) {
-    if (vm->numObjects == vm->maxObjects) gc(vm);
+Object *VM::newObject(ObjectType type) {
+    if (this->numObjects == this->maxObjects) gc();
 
 //    auto *object = static_cast<Object *>(malloc(sizeof(Object)));
-    auto* object = new Object();
+    auto *object = new Object();
     object->type = type;
-    object->next = vm->firstObject;
-    vm->firstObject = object;
+    object->next = this->firstObject;
+    this->firstObject = object;
     object->marked = 0;
 
-    vm->numObjects++;
+    this->numObjects++;
 
     return object;
 }
 
-void pushInt(VM *vm, int intValue) {
-    Object *object = newObject(vm, ObjectType::OBJ_INT);
+void VM::pushInt(int intValue) {
+    Object *object = newObject(ObjectType::OBJ_INT);
     object->value = intValue;
 
-    push(vm, object);
+    push(object);
 }
 
-Object *pushPair(VM *vm) {
-    Object *object = newObject(vm, ObjectType::OBJ_PAIR);
-    object->tail = pop(vm);
-    object->head = pop(vm);
+Object *VM::pushPair() {
+    Object *object = newObject(ObjectType::OBJ_PAIR);
+    object->tail = pop();
+    object->head = pop();
 
-    push(vm, object);
+    push(object);
     return object;
 }
 
-void freeVM(VM *vm) {
-    vm->stackSize = 0;
-    gc(vm);
-    delete(vm);
+void VM::freeVM() {
+    this->stackSize = 0;
+    gc();
+}
+
+void VM::assert(int condition, const char *message) {
+    if (!condition) {
+        std::cout << message << std::endl;
+        exit(1);
+    }
 }
