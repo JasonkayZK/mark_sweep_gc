@@ -1,7 +1,7 @@
 #ifndef MARK_SWEEP_GC_OBJ_H
 #define MARK_SWEEP_GC_OBJ_H
 
-#include "vm.h"
+#include "../vm/vm.h"
 
 struct VM;
 

@@ -1,7 +1,7 @@
 #ifndef MARK_SWEEP_GC_VM_H
 #define MARK_SWEEP_GC_VM_H
 
-#include "obj.h"
+#include "../obj/obj.h"
 
 #define STACK_MAX 256
 #define INIT_OBJ_NUM_MAX 8

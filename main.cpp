@@ -1,6 +1,6 @@
 #include <cstdio>
 
-#include "vm.h"
+#include "vm/vm.h"
 
 void test1() {
     printf("Test 1: Objects on stack are preserved.\n");
