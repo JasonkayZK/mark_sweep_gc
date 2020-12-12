@@ -10,7 +10,8 @@ void assert(int condition, const char *message) {
 }
 
 VM *newVM() {
-    VM *vm = static_cast<VM *>(malloc(sizeof(VM)));
+//    VM *vm = static_cast<VM *>(malloc(sizeof(VM)));
+    VM* vm = new VM();
     vm->stackSize = 0;
     vm->firstObject = nullptr;
     vm->numObjects = 0;
@@ -57,7 +58,7 @@ void sweep(VM *vm) {
             Object *unreached = *object;
 
             *object = unreached->next;
-            free(unreached);
+            delete(unreached);
 
             vm->numObjects--;
         } else {
@@ -84,7 +85,8 @@ void gc(VM *vm) {
 Object *newObject(VM *vm, ObjectType type) {
     if (vm->numObjects == vm->maxObjects) gc(vm);
 
-    auto *object = static_cast<Object *>(malloc(sizeof(Object)));
+//    auto *object = static_cast<Object *>(malloc(sizeof(Object)));
+    auto* object = new Object();
     object->type = type;
     object->next = vm->firstObject;
     vm->firstObject = object;
@@ -114,5 +116,5 @@ Object *pushPair(VM *vm) {
 void freeVM(VM *vm) {
     vm->stackSize = 0;
     gc(vm);
-    free(vm);
+    delete(vm);
 }
