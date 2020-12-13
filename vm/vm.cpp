@@ -6,18 +6,17 @@ VM::VM() {
     this->stackSize = 0;
     this->firstObject = nullptr;
     this->numObjects = 0;
-    this->maxObjects = INIT_OBJ_NUM_MAX;
+    this->maxObjects = INITIAL_GC_THRESHOLD;
 }
 
 VM::~VM() {
-    std::cout << "full-gc finished, vm closed!" << std::endl;
+    std::cout << "all objects cleaned, vm closed!" << std::endl;
 }
 
 void VM::push(Object *value) {
     assert(this->stackSize < STACK_MAX, "Stack overflow!");
     this->stack[this->stackSize++] = value;
 }
-
 
 Object *VM::pop() {
     assert(this->stackSize > 0, "Stack underflow!");
@@ -69,7 +68,7 @@ void VM::gc() {
     markAll();
     sweep();
 
-    this->maxObjects = this->numObjects == 0 ? INIT_OBJ_NUM_MAX : this->numObjects * 2;
+    this->maxObjects = this->numObjects == 0 ? INITIAL_GC_THRESHOLD : this->numObjects * 2;
 
     printf("Collected %d objects, %d remaining.\n", i_numObjects - this->numObjects,
            this->numObjects);
@@ -78,7 +77,6 @@ void VM::gc() {
 Object *VM::newObject(ObjectType type) {
     if (this->numObjects == this->maxObjects) gc();
 
-//    auto *object = static_cast<Object *>(malloc(sizeof(Object)));
     auto *object = new Object();
     object->type = type;
     object->next = this->firstObject;

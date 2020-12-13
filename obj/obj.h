@@ -3,8 +3,6 @@
 
 #include "../vm/vm.h"
 
-class VM;
-
 enum class ObjectType;
 
 class Object {

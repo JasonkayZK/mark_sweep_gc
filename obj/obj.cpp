@@ -4,7 +4,7 @@
 void Object::objectPrint(Object *object) {
     switch (object->type) {
         case ObjectType::OBJ_INT:
-            printf("%d", object->value);
+            std::cout << object->value << std::endl;
             break;
 
         case ObjectType::OBJ_PAIR:

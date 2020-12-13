@@ -4,7 +4,7 @@
 #include "../obj/obj.h"
 
 #define STACK_MAX 256
-#define INIT_OBJ_NUM_MAX 8
+#define INITIAL_GC_THRESHOLD 8
 
 class Object;
 
